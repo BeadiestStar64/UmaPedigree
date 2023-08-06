@@ -23,6 +23,10 @@ public class UPGRead extends UmaPedigree {
 
     private static final ArrayList<String> racesList = new ArrayList<>();
 
+    private static final ArrayList<String> scenarioList = new ArrayList<>();
+
+    private ArrayList<String> tempList = new ArrayList<>();
+
     public static ArrayList<ArrayList<String>> getUmaList() {return umaList;}
     public static ArrayList<ArrayList<String>> getGroundGroup() {return groundGroup;}
     public static ArrayList<ArrayList<String>> getDistanceGroup() {return distanceGroup;}
@@ -33,10 +37,12 @@ public class UPGRead extends UmaPedigree {
 
     public static ArrayList<String> getRacesList() {return racesList;}
 
+    public static ArrayList<String> getScenarioList() {return scenarioList;}
+
     public void INIT() {
         Path path = Paths.get("").toAbsolutePath();
         FileSys sys = new FileSys();
-        String[] fileNames = {"UmaName", "FactorSkillName", "Races"};
+        String[] fileNames = {"UmaName", "FactorSkillName", "Races", "Scenario"};
         for(String fileName : fileNames) {
             File file = sys.createFile("upg", path, fileName, "upg");
             if(!file.exists()) {
@@ -45,13 +51,13 @@ public class UPGRead extends UmaPedigree {
                 sys.copyResource(resource, target);
             }
         }
-
         setDisplay(new mainDisplay());
         getDisplay().prepareSys();
         read();
         readPassiveSkill();
         sqlSetupRead();
         readRaces();
+        readScenario();
         getDisplay().preparedSys();
     }
 
@@ -287,6 +293,28 @@ public class UPGRead extends UmaPedigree {
         }
     }
 
+    public void readScenario() {
+        debugMethod(false);
+        Path path = Paths.get("").toAbsolutePath();
+        File file = new File(path + File.separator + "upg" + File.separator + "Scenario.upg");
+        try (InputStream input = new FileInputStream(file);
+             InputStreamReader iReader = new InputStreamReader(input, StandardCharsets.UTF_8);
+             BufferedReader reader = new BufferedReader(iReader)){
+
+            String data;
+
+            while ((data = reader.readLine()) != null) {
+                if(data.charAt(0) == '#') {
+                    continue;
+                }
+                getScenarioList().add(data);
+            }
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public int updateList(int column, ArrayList<String> nameList, ArrayList<String> groundList, ArrayList<String> distanceList, ArrayList<String> legsList, ArrayList<String> uniqueSkillList) {
         umaList.add(nameList);
         groundGroup.add(groundList);
@@ -300,31 +328,125 @@ public class UPGRead extends UmaPedigree {
         FileSys sys = new FileSys();
         ArrayList<ArrayList<String>> list = sys.readFile(path);
 
-        String umaName;
-        String blueFactorName;
-        int blueFactorLevel;
-        String redFactorName;
-        int redFactorLevel;
-        String uniqueFactorName;
-        int uniqueFactorLevel;
-        ArrayList<String> skillFactorName;
-        ArrayList<Integer> skillFactorLevel;
-        int evaluationPoint;
-        int lifetimeRecord_All;
-        int lifetimeRecord_AllWin;
-        int lifetimeRecord_G1;
-        int lifetimeRecord_G1Name;
-        int fans;
-        String winningHistory;
-        String scenario;
+        ArrayList<String> umaName = new ArrayList<>();
+        ArrayList<String> blueFactorName = new ArrayList<>();
+        ArrayList<Integer> blueFactorLevel = new ArrayList<>();
+        ArrayList<String> redFactorName = new ArrayList<>();
+        ArrayList<Integer> redFactorLevel = new ArrayList<>();
+        ArrayList<String> uniqueFactorName = new ArrayList<>();
+        ArrayList<Integer> uniqueFactorLevel = new ArrayList<>();
+        ArrayList<ArrayList<String>> skillFactorName = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> skillFactorLevel = new ArrayList<>();
+        ArrayList<Integer> evaluationPoint = new ArrayList<>();
+        ArrayList<Integer> lifetimeRecord_All = new ArrayList<>();
+        ArrayList<Integer> lifetimeRecord_AllWin = new ArrayList<>();
+        ArrayList<Integer> lifetimeRecord_G1 = new ArrayList<>();
+        ArrayList<ArrayList<String>> lifetimeRecord_G1Name = new ArrayList<>();
+        ArrayList<Integer> fans = new ArrayList<>();
+        ArrayList<String> winningHistory = new ArrayList<>();
+        ArrayList<String> scenario = new ArrayList<>();
 
-        int i = 0;
         for(ArrayList<String> array : list) {
             for(String str : array) {
-                String[] strings = str.split("\\[");
-                System.out.println(Arrays.toString(strings));
+                boolean tempBool = false;
+                boolean addTempBool = false;
+                String[] rowData = str.split(",");
+                int num = 0;
+                for(String detail : rowData) {
+                    if(tempBool) {
+                        tempBool = compressList(detail);
+                        if(!tempBool) {
+                            addTempBool = true;
+                        }
+                    }else{
+                        if(addTempBool) {
+                            switch (num) {
+                                case 7 -> skillFactorName.add(tempList);
+                                case 8 -> {
+                                    ArrayList<Integer> tempArray = new ArrayList<>();
+                                    for(String tempStr : tempList) {
+                                        tempArray.add(Integer.valueOf(tempStr));
+                                    }
+                                    skillFactorLevel.add(tempArray);
+                                }
+                                case 13 -> lifetimeRecord_G1Name.add(tempList);
+                            }
+                            tempList = new ArrayList<>();
+                            addTempBool = false;
+                            num++;
+                        }
+                        if(detail.charAt(0) == '[') {
+                            tempBool = true;
+                            compressList(detail);
+                        }else{
+                            switch (num) {
+                                case 0 -> umaName.add(detail);
+                                case 1 -> blueFactorName.add(detail);
+                                case 2 -> blueFactorLevel.add(Integer.valueOf(detail));
+                                case 3 -> redFactorName.add(detail);
+                                case 4 -> redFactorLevel.add(Integer.valueOf(detail));
+                                case 5 -> uniqueFactorName.add(detail);
+                                case 6 -> uniqueFactorLevel.add(Integer.valueOf(detail));
+                                case 9 -> evaluationPoint.add(Integer.valueOf(detail));
+                                case 10 -> lifetimeRecord_All.add(Integer.valueOf(detail));
+                                case 11 -> lifetimeRecord_AllWin.add(Integer.valueOf(detail));
+                                case 12 -> lifetimeRecord_G1.add(Integer.valueOf(detail));
+                                case 15 -> fans.add(Integer.valueOf(detail));
+                                case 16 -> winningHistory.add(detail);
+                                case 17 -> scenario.add(detail);
+                            }
+                            num++;
+                        }
+                    }
+                }
             }
         }
+        System.out.println("検出された名前: " + umaName);
+        System.out.println("検出された青因子(名前): " + blueFactorName);
+        System.out.println("検出された青因子(Level): " + blueFactorLevel);
+        System.out.println("検出された赤因子(名前): " + redFactorName);
+        System.out.println("検出された赤因子(Level): " + redFactorLevel);
+        System.out.println("検出された固有因子(名前): " + uniqueFactorName);
+        System.out.println("検出された固有因子(Level): " + uniqueFactorLevel);
+        System.out.println("検出された白因子(名前): " + skillFactorName);
+        System.out.println("検出された白因子(Level): " + skillFactorLevel);
+        System.out.println("検出された育成評価点: " + evaluationPoint);
+        System.out.println("検出されたレース出走数: " + lifetimeRecord_All);
+        System.out.println("検出されたレース勝利数: " + lifetimeRecord_AllWin);
+        System.out.println("検出されたG1レース勝利数: " + lifetimeRecord_G1);
+        System.out.println("検出された勝利G1レース名: " + lifetimeRecord_G1Name);
+        System.out.println("検出された獲得ファン数: " + fans);
+        System.out.println("検出された二つ名: " + winningHistory);
+        System.out.println("検出された育成シナリオ: " + scenario);
+        getSql().writeData(umaName,
+                blueFactorName, blueFactorLevel,
+                redFactorName, redFactorLevel,
+                uniqueFactorName, uniqueFactorLevel,
+                skillFactorName, skillFactorLevel,
+                evaluationPoint,
+                lifetimeRecord_All, lifetimeRecord_AllWin, lifetimeRecord_G1, lifetimeRecord_G1Name,
+                fans, winningHistory, scenario);
+    }
+
+    public boolean compressList(String detail) {
+        boolean bool = true;
+        if(detail.charAt(detail.length() - 1) == ']') {
+            if(detail.charAt(1) == '[') {
+                bool = false;
+            }else if(detail.charAt(detail.length() - 2) == ']') {
+                bool = false;
+                detail = detail.substring(0, detail.length() - 1);
+            }else{
+                detail = detail.replace("]", "");
+                bool = false;
+            }
+        }
+        if(tempList.isEmpty()) {
+            tempList.add(detail.substring(1));
+        }else{
+            tempList.add(detail);
+        }
+        return bool;
     }
 
     public void versionCheck() {

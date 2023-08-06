@@ -121,7 +121,7 @@ public class mainDisplay extends UmaPedigree {
         System.out.println(escape.getGREEN() + "===== Welcome to UmaPedigree =====" + escape.getRESET());
         System.out.println("モードを選択してください。");
         System.out.println("\n1. 継承結果一覧");
-        System.out.println("2. ウマ娘一覧");
+        System.out.println("2. 親ウマ娘一覧");
         System.out.println("3. データ読み込み");
         System.out.println("0. 終了");
         receptor.entrance("main select");
@@ -134,7 +134,7 @@ public class mainDisplay extends UmaPedigree {
         System.out.println("\n1. 登録");
         System.out.println("2. 閲覧");
         System.out.println("3. 削除");
-        System.out.println("4. csv取り込み");
+        System.out.println("4. データ取り込み");
         System.out.println("0. 戻る");
         receptor.entrance("register");
     }
@@ -144,6 +144,7 @@ public class mainDisplay extends UmaPedigree {
         System.out.println("取り込みたいデータを" +
                 escape.getMagenta() + "絶対パス" +
                 escape.getRESET() + "で指定してください。");
+        System.out.println("対応ファイル拡張子は、txtです。");
         receptor.inputReceptor();
     }
 

@@ -133,7 +133,7 @@ public class parentDisplay extends UmaPedigree {
 
     public void entrance() {
         clear();
-        System.out.println("===== 親一覧 =====\n");
+        System.out.println("===== 親ウマ娘一覧 =====\n");
         System.out.println("1. 登録");
         System.out.println("2. 閲覧");
         System.out.println("3. 削除");
@@ -308,7 +308,7 @@ public class parentDisplay extends UmaPedigree {
             }
             case 14 -> {
                 clear();
-                String[] scenarios = {"URA", "アオハル", "グランドライブ", "グランドマスターズ"};
+                String[] scenarios = UPGRead.getScenarioList().toArray(new String[0]);
                 System.out.println("評価点: " + getEvaluationPoint());
                 System.out.println("出走レース数: " + getLifetimeRecordAll());
                 System.out.println("勝利レース数: " + getLifetimeRecord());

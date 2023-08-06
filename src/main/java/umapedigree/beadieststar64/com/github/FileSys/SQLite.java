@@ -310,11 +310,92 @@ public class SQLite {
             prepStmt.setString(16, "winingHistory");
             prepStmt.setString(17, scenario);
 
-            System.out.println(prepStmt.executeUpdate());
-            //原因はこいつでした()
+            prepStmt.executeUpdate();
             getRecordCon().commit();
-            System.out.println("commit完了");
             prepStmt.close();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public synchronized void writeData(ArrayList<String> umamusumeName,
+                                       ArrayList<String> blueFactorName, ArrayList<Integer> blueFactorLevel,
+                                       ArrayList<String> redFactorName, ArrayList<Integer> redFactorLevel,
+                                       ArrayList<String> uniqueFactorName, ArrayList<Integer> uniqueFactorLevel,
+                                       ArrayList<ArrayList<String>> skillFactorNames, ArrayList<ArrayList<Integer>> skillFactorLevels,
+                                       ArrayList<Integer> evaluationPoint,
+                                       ArrayList<Integer> lifetimeRecordAll, ArrayList<Integer> lifetimeRecordAllWin, ArrayList<Integer> lifetimeRecordG1s, ArrayList<ArrayList<String>> lifetimeRecordG1,
+                                       ArrayList<Integer> collectedFans, ArrayList<String> winingHistory, ArrayList<String> scenario) {
+
+        try {
+            PreparedStatement prepStmt = getRecordCon().prepareStatement("INSERT INTO RECORD(" +
+                    "NAME" +
+                    ", BLUE_FACTOR_NAME" +
+                    ", BLUE_FACTOR_LEVEL" +
+                    ", RED_FACTOR_NAME" +
+                    ", RED_FACTOR_LEVEL" +
+                    ", GREEN_FACTOR_NAME" +
+                    ", GREEN_FACTOR_LEVEL" +
+                    ", SKILL_FACTORS_NAME" +
+                    ", SKILL_FACTORS_LEVEL" +
+                    ", EVALUATION_POINT" +
+                    ", LIFETIME_RECORD_ALL" +
+                    ", LIFETIME_RECORD_WIN" +
+                    ", LIFETIME_RECORD_G1WINS_NUM" +
+                    ", LIFETIME_RECORD_G1WINS_NAME" +
+                    ", FANS" +
+                    ", WINNING_HISTORY" +
+                    ", SCENARIO" +
+                    ") VALUES (" +
+                    "?" +
+                    ", ?" +
+                    ", ?" +
+                    ", ?" +
+                    ", ?" +
+                    ", ?" +
+                    ", ?" +
+                    ", ?" +
+                    ", ?" +
+                    ", ?" +
+                    ", ?" +
+                    ", ?" +
+                    ", ?" +
+                    ", ?" +
+                    ", ?" +
+                    ", ?" +
+                    ", ?" +
+                    ");");
+
+            for(int i = 0, l = umamusumeName.size(); i < l; i++) {
+                String skillFactorsName = skillFactorNames.get(i).toString();
+                String skillFactorsNum = skillFactorLevels.get(i).toString();
+                String G1Names = lifetimeRecordG1.get(i).toString();
+
+                prepStmt.setString(1, umamusumeName.get(i));
+                prepStmt.setString(2, blueFactorName.get(i));
+                prepStmt.setInt(3, blueFactorLevel.get(i));
+                prepStmt.setString(4, redFactorName.get(i));
+                prepStmt.setInt(5, redFactorLevel.get(i));
+                prepStmt.setString(6, uniqueFactorName.get(i));
+                prepStmt.setInt(7, uniqueFactorLevel.get(i));
+                prepStmt.setString(8, skillFactorsName);
+                prepStmt.setString(9, skillFactorsNum);
+                prepStmt.setInt(10, evaluationPoint.get(i));
+                prepStmt.setInt(11, lifetimeRecordAll.get(i));
+                prepStmt.setInt(12, lifetimeRecordAllWin.get(i));
+                prepStmt.setInt(13, lifetimeRecordG1s.get(i));
+                prepStmt.setString(14, G1Names);
+                prepStmt.setInt(15, collectedFans.get(i));
+                prepStmt.setString(16, winingHistory.get(i));
+                prepStmt.setString(17, scenario.get(i));
+                prepStmt.addBatch();
+
+                if(i == l - 1) {
+                    prepStmt.executeBatch();
+                    getRecordCon().commit();
+                    prepStmt.close();
+                }
+            }
         }catch (Exception e) {
             e.printStackTrace();
         }

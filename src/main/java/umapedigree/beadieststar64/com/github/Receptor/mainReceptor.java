@@ -7,6 +7,8 @@ import umapedigree.beadieststar64.com.github.FileSys.FileSys;
 import umapedigree.beadieststar64.com.github.UmaPedigree;
 
 import java.io.File;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -59,6 +61,7 @@ public class mainReceptor extends UmaPedigree {
                         case 1 -> display.registerUma("success");
                         case 2 -> {}
                         case 3 -> {}
+                        case 4 -> {}
                         default -> display.selectError();
                     }
                 }
@@ -76,10 +79,11 @@ public class mainReceptor extends UmaPedigree {
     }
 
     public void inputReceptor() {
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in, "MS932");
         String path = scanner.next();
         path = path.replace("\"", "");
         File file = new File(path);
+        System.out.println(file + "を検索します...");
         if(file.exists()) {
             System.out.println("ファイルが見つかりました");
             getRead().inputTxt(path);
